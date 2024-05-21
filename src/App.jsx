@@ -6,16 +6,15 @@ import "./App.css";
 
 // pavyzdiniai duomenys be db
 const initialContainers = {
-  classroomA: [
+  itemList: [
     { id: "1", title: "vaikas1", imageSrc: "../assets/pics/kiddo.png" },
     { id: "2", title: "vaikas2", imageSrc: "../assets/pics/kiddo.png" },
-  ],
-  classroomB: [
     { id: "3", title: "vaikas3", imageSrc: "../assets/pics/kiddo.png" },
-  ],
-  classroomC: [
     { id: "4", title: "vaikas4", imageSrc: "../assets/pics/kiddo.png" },
   ],
+  classroomA: [],
+  classroomB: [],
+  classroomC: [],
 };
 
 function App() {
@@ -36,9 +35,10 @@ function App() {
       containers[key].some((item) => item.id === active.id),
     );
 
-    const overContainer = Object.keys(containers).find((key) =>
-      containers[key].some((item) => item.id === over.id),
-    );
+    const overContainer = over.data.current?.sortable?.containerId;
+
+    console.log("Active Container:", activeContainer);
+    console.log("Over Container:", overContainer);
 
     if (activeContainer && overContainer && activeContainer !== overContainer) {
       setContainers((prev) => {
@@ -50,8 +50,7 @@ function App() {
         );
         const [movedItem] = activeItems.splice(activeIndex, 1);
 
-        const overIndex = overItems.findIndex((item) => item.id === over.id);
-        overItems.splice(overIndex, 0, movedItem);
+        overItems.push(movedItem);
 
         return {
           ...prev,
@@ -104,6 +103,11 @@ function App() {
       onDragEnd={handleDragEnd}
     >
       <div className="App">
+        <Container
+          id="itemList"
+          items={containers.itemList}
+          title="Item List"
+        />
         <Container
           id="classroomA"
           items={containers.classroomA}
