@@ -63,3 +63,12 @@
   height: 100px;
   object-fit: cover;
 }
+
+/* classrooms */
+
+.App {
+  display: flex;
+  justify-content: space-between;
+  padding: 2rem;
+  gap: 4em;
+}
