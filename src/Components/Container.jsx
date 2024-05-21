@@ -1,16 +1,27 @@
 import SortableItem from "./SortableItem";
-import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { Droppable } from "react-beautiful-dnd";
 import "../App.css";
 
 function Container({ id, items, title }) {
   return (
     <div className="container">
       <h2>{title}</h2>
-      <SortableContext id={id} items={items} strategy={rectSortingStrategy}>
-        {items.map(({ id, title, imageSrc }) => (
-          <SortableItem key={id} id={id} title={title} imageSrc={imageSrc} />
-        ))}
-      </SortableContext>
+      <Droppable droppableId={id}>
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            {items.map(({ id, title, imageSrc }, index) => (
+              <SortableItem
+                key={id}
+                id={id}
+                title={title}
+                imageSrc={imageSrc}
+                index={index}
+              />
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 }
