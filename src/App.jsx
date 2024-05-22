@@ -18,6 +18,9 @@ const initialContainers = {
 
 function App() {
   const [containers, setContainers] = useState(initialContainers);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [newItemImageSrc, setNewItemImageSrc] = useState("");
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
@@ -50,8 +53,49 @@ function App() {
     }
   };
 
+  const addItem = () => {
+    const newItem = {
+      id: (containers.itemList.length + 1).toString(),
+      title: newItemTitle,
+      imageSrc: newItemImageSrc,
+    };
+
+    setContainers((prev) => ({
+      ...prev,
+      itemList: [...prev.itemList, newItem],
+    }));
+
+    setIsModalOpen(false);
+    setNewItemTitle("");
+    setNewItemImageSrc("");
+  };
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
+      <button onClick={() => setIsModalOpen(true)}>Add New Item</button>
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Add New Item</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newItemTitle}
+              onChange={(e) => setNewItemTitle(e.target.value)}
+              className="modal-input"
+            />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={newItemImageSrc}
+              onChange={(e) => setNewItemImageSrc(e.target.value)}
+              className="modal-input"
+            />
+            <button onClick={addItem}>Add</button>
+            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
       <div className="App">
         <Container
           id="itemList"
