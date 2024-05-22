@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { DragDropContext } from "react-beautiful-dnd";
 import Container from "./Components/Container";
 import "./App.css";
 
@@ -19,89 +18,84 @@ const initialContainers = {
 
 function App() {
   const [containers, setContainers] = useState(initialContainers);
-  const [activeId, setActiveId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [newItemImageSrc, setNewItemImageSrc] = useState("");
 
-  const handleDragStart = (event) => {
-    setActiveId(event.active.id);
-  };
+  const handleDragEnd = (result) => {
+    const { source, destination } = result;
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    setActiveId(null);
+    if (!destination) return;
 
-    if (!over) return;
+    const sourceContainer = source.droppableId;
+    const destinationContainer = destination.droppableId;
 
-    const activeContainer = Object.keys(containers).find((key) =>
-      containers[key].some((item) => item.id === active.id),
-    );
+    if (sourceContainer === destinationContainer) {
+      const items = Array.from(containers[sourceContainer]);
+      const [movedItem] = items.splice(source.index, 1);
+      items.splice(destination.index, 0, movedItem);
 
-    const overContainer = over.data.current?.sortable?.containerId;
+      setContainers((prev) => ({
+        ...prev,
+        [sourceContainer]: items,
+      }));
+    } else {
+      const sourceItems = Array.from(containers[sourceContainer]);
+      const destinationItems = Array.from(containers[destinationContainer]);
+      const [movedItem] = sourceItems.splice(source.index, 1);
+      destinationItems.splice(destination.index, 0, movedItem);
 
-    console.log("Active Container:", activeContainer);
-    console.log("Over Container:", overContainer);
-
-    if (activeContainer && overContainer && activeContainer !== overContainer) {
-      setContainers((prev) => {
-        const activeItems = [...prev[activeContainer]];
-        const overItems = [...prev[overContainer]];
-
-        const activeIndex = activeItems.findIndex(
-          (item) => item.id === active.id,
-        );
-        const [movedItem] = activeItems.splice(activeIndex, 1);
-
-        overItems.push(movedItem);
-
-        return {
-          ...prev,
-          [activeContainer]: activeItems,
-          [overContainer]: overItems,
-        };
-      });
-    } else if (activeContainer === overContainer) {
-      setContainers((prev) => {
-        const items = [...prev[activeContainer]];
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return {
-          ...prev,
-          [activeContainer]: arrayMove(items, oldIndex, newIndex),
-        };
-      });
+      setContainers((prev) => ({
+        ...prev,
+        [sourceContainer]: sourceItems,
+        [destinationContainer]: destinationItems,
+      }));
     }
   };
 
-  const renderDragOverlay = () => {
-    if (!activeId) return null;
+  const addItem = () => {
+    const newItem = {
+      id: (containers.itemList.length + 1).toString(),
+      title: newItemTitle,
+      imageSrc: newItemImageSrc,
+    };
 
-    const activeContainer = Object.keys(containers).find((key) =>
-      containers[key].some((item) => item.id === activeId),
-    );
+    setContainers((prev) => ({
+      ...prev,
+      itemList: [...prev.itemList, newItem],
+    }));
 
-    if (!activeContainer) return null;
-
-    const activeItem = containers[activeContainer].find(
-      (item) => item.id === activeId,
-    );
-
-    return (
-      <div className="sortable-item">
-        <h3>{activeItem.title}</h3>
-        <img
-          src={activeItem.imageSrc}
-          alt={activeItem.title}
-          style={{ width: "100px", height: "100px", objectFit: "cover" }}
-        />
-      </div>
-    );
+    setIsModalOpen(false);
+    setNewItemTitle("");
+    setNewItemImageSrc("");
   };
 
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <button onClick={() => setIsModalOpen(true)}>Add New Item</button>
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Add New Item</h2>
+            <input
+              type="text"
+              placeholder="Title"
+              value={newItemTitle}
+              onChange={(e) => setNewItemTitle(e.target.value)}
+              className="modal-input"
+            />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={newItemImageSrc}
+              onChange={(e) => setNewItemImageSrc(e.target.value)}
+              className="modal-input"
+            />
+            <button onClick={addItem}>Add</button>
+            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
       <div className="App">
         <Container
           id="itemList"
@@ -123,9 +117,8 @@ function App() {
           items={containers.classroomC}
           title="Classroom C"
         />
-        <DragOverlay>{renderDragOverlay()}</DragOverlay>
       </div>
-    </DndContext>
+    </DragDropContext>
   );
 }
 
