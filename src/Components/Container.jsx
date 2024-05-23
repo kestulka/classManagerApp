@@ -7,8 +7,14 @@ function Container({ id, items, title }) {
     <div className="container">
       <h2>{title}</h2>
       <Droppable droppableId={id}>
-        {(provided) => (
-          <div ref={provided.innerRef} {...provided.droppableProps}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={`droppable-container ${
+              snapshot.isDraggingOver ? "dragging-over" : ""
+            }`}
+          >
             {items.map(({ id, title, imageSrc }, index) => (
               <SortableItem
                 key={id}

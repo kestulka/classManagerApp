@@ -88,3 +88,26 @@
   width: 100%;
   box-sizing: border-box;
 }
+
+/* item container */
+
+.droppable-container {
+  position: relative;
+  padding: 16px;
+  border: 2px dashed transparent;
+  transition: border-color 0.2s ease;
+}
+
+.droppable-container.dragging-over {
+  border-color: green;
+}
+
+.droppable-container.dragging-over::after {
+  content: "+";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: green;
+}
