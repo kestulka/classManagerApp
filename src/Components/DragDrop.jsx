@@ -3,8 +3,6 @@ import { DragDropContext } from "react-beautiful-dnd";
 import Container from "./Container";
 import "../App.css";
 
-// pavyzdiniai duomenys be db
-
 const initialContainers = {
   itemList: [
     { id: "1", title: "vaikas1", imageSrc: "../assets/pics/kiddo.png" },
@@ -12,12 +10,13 @@ const initialContainers = {
     { id: "3", title: "vaikas3", imageSrc: "../assets/pics/kiddo.png" },
     { id: "4", title: "vaikas4", imageSrc: "../assets/pics/kiddo.png" },
   ],
-  classroomA: [],
-  classroomB: [],
-  classroomC: [],
+  desk1: [],
+  desk2: [],
+  desk3: [],
+  desk4: [],
 };
 
-function App() {
+function DragDrop() {
   const [containers, setContainers] = useState(initialContainers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState("");
@@ -73,7 +72,6 @@ function App() {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <button onClick={() => setIsModalOpen(true)}>Add New Item</button>
       {isModalOpen && (
         <div className="modal">
           <div className="modal-content">
@@ -103,24 +101,18 @@ function App() {
           items={containers.itemList}
           title="Item List"
         />
-        <Container
-          id="classroomA"
-          items={containers.classroomA}
-          title="Classroom A"
-        />
-        <Container
-          id="classroomB"
-          items={containers.classroomB}
-          title="Classroom B"
-        />
-        <Container
-          id="classroomC"
-          items={containers.classroomC}
-          title="Classroom C"
-        />
+        <div className="desks">
+          <button onClick={() => setIsModalOpen(true)}>
+            Prideti nauja vaika
+          </button>
+          <Container id="desk1" items={containers.desk1} title="Desk 1" />
+          <Container id="desk2" items={containers.desk2} title="Desk 2" />
+          <Container id="desk3" items={containers.desk3} title="Desk 3" />
+          <Container id="desk4" items={containers.desk4} title="Desk 4" />
+        </div>
       </div>
     </DragDropContext>
   );
 }
 
-export default App;
+export default DragDrop;

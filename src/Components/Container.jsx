@@ -4,7 +4,7 @@ import "../App.css";
 
 function Container({ id, items, title }) {
   return (
-    <div className="container">
+    <div id={id} className="container">
       <h2>{title}</h2>
       <Droppable droppableId={id}>
         {(provided, snapshot) => (
