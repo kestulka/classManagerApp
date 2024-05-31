@@ -10,7 +10,7 @@ CREATE TABLE teachers (
 
 CREATE TABLE classes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    class_name ENUM('A', 'B', 'C') NOT NULL,
+    class_name ENUM('A', 'B', 'C', 'D') NOT NULL,
     teacher_id INT NOT NULL,
     class_number INT NOT NULL,
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
@@ -31,5 +31,14 @@ CREATE TABLE parents (
     name VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20) NOT NULL,
+    FOREIGN KEY (kid_id) REFERENCES kids(id) ON DELETE CASCADE
+);
+
+CREATE TABLE seating_arrangements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    class_id INT NOT NULL,
+    kid_id INT NOT NULL,
+    desk_number ENUM('desk1', 'desk2', 'desk3', 'desk4') NOT NULL,
+    FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
     FOREIGN KEY (kid_id) REFERENCES kids(id) ON DELETE CASCADE
 );

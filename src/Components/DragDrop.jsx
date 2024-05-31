@@ -1,26 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import Container from "./Container";
 import "../App.css";
 
-const initialContainers = {
-  itemList: [
-    { id: "1", title: "vaikas1", imageSrc: "../assets/pics/kiddo.png" },
-    { id: "2", title: "vaikas2", imageSrc: "../assets/pics/kiddo.png" },
-    { id: "3", title: "vaikas3", imageSrc: "../assets/pics/kiddo.png" },
-    { id: "4", title: "vaikas4", imageSrc: "../assets/pics/kiddo.png" },
-  ],
-  desk1: [],
-  desk2: [],
-  desk3: [],
-  desk4: [],
-};
-
 function DragDrop() {
-  const [containers, setContainers] = useState(initialContainers);
+  const [containers, setContainers] = useState({
+    itemList: [],
+    desk1: [],
+    desk2: [],
+    desk3: [],
+    desk4: [],
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newItemTitle, setNewItemTitle] = useState("");
   const [newItemImageSrc, setNewItemImageSrc] = useState("");
+  const [selectedClass, setSelectedClass] = useState("A");
+
+  useEffect(() => {
+    const fetchData = () => {
+      const data = JSON.parse(
+        localStorage.getItem(`class_${selectedClass}`),
+      ) || {
+        itemList: [],
+        desk1: [],
+        desk2: [],
+        desk3: [],
+        desk4: [],
+      };
+
+      setContainers({
+        itemList: data.itemList,
+        desk1: data.desk1 || [],
+        desk2: data.desk2 || [],
+        desk3: data.desk3 || [],
+        desk4: data.desk4 || [],
+      });
+    };
+
+    // Reset containers to initial state before fetching new data
+    setContainers({
+      itemList: [],
+      desk1: [],
+      desk2: [],
+      desk3: [],
+      desk4: [],
+    });
+
+    fetchData();
+  }, [selectedClass]);
 
   const handleDragEnd = (result) => {
     const { source, destination } = result;
@@ -30,27 +57,43 @@ function DragDrop() {
     const sourceContainer = source.droppableId;
     const destinationContainer = destination.droppableId;
 
+    if (
+      destinationContainer.startsWith("desk") &&
+      containers[destinationContainer].length > 0
+    ) {
+      return;
+    }
+
+    let updatedContainers;
     if (sourceContainer === destinationContainer) {
       const items = Array.from(containers[sourceContainer]);
       const [movedItem] = items.splice(source.index, 1);
       items.splice(destination.index, 0, movedItem);
 
-      setContainers((prev) => ({
-        ...prev,
+      updatedContainers = {
+        ...containers,
         [sourceContainer]: items,
-      }));
+      };
     } else {
       const sourceItems = Array.from(containers[sourceContainer]);
       const destinationItems = Array.from(containers[destinationContainer]);
       const [movedItem] = sourceItems.splice(source.index, 1);
       destinationItems.splice(destination.index, 0, movedItem);
 
-      setContainers((prev) => ({
-        ...prev,
+      updatedContainers = {
+        ...containers,
         [sourceContainer]: sourceItems,
         [destinationContainer]: destinationItems,
-      }));
+      };
     }
+
+    setContainers(updatedContainers);
+
+    // Save the updated seating arrangement to local storage
+    localStorage.setItem(
+      `class_${selectedClass}`,
+      JSON.stringify(updatedContainers),
+    );
   };
 
   const addItem = () => {
@@ -60,10 +103,18 @@ function DragDrop() {
       imageSrc: newItemImageSrc,
     };
 
-    setContainers((prev) => ({
-      ...prev,
-      itemList: [...prev.itemList, newItem],
-    }));
+    const updatedContainers = {
+      ...containers,
+      itemList: [...containers.itemList, newItem],
+    };
+
+    setContainers(updatedContainers);
+
+    // Save the updated item list to local storage
+    localStorage.setItem(
+      `class_${selectedClass}`,
+      JSON.stringify(updatedContainers),
+    );
 
     setIsModalOpen(false);
     setNewItemTitle("");
@@ -96,6 +147,15 @@ function DragDrop() {
         </div>
       )}
       <div className="App">
+        <select
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+        >
+          <option value="A">Class A</option>
+          <option value="B">Class B</option>
+          <option value="C">Class C</option>
+          <option value="D">Class D</option>
+        </select>
         <Container
           id="itemList"
           items={containers.itemList}
